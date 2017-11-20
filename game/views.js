@@ -68,6 +68,7 @@
 
         this.player.on('trayChanged', this.updateTray.bind(this));
         this.game.on('turnChanged', this.turnChanged.bind(this));
+        this.game.on('addPlayer', this.playerAdded.bind(this));
 
         this.updateTray();
         this.turnChanged();
@@ -76,6 +77,9 @@
     PlayerView.prototype.turnChanged = function() {
         utils.show(this.el_btnplay, (this.game.whoseTurn == this.playernr));
         this.showStatus("Waiting for "+this.game.players[this.game.whoseTurn].name+"'s move");
+    }
+    PlayerView.prototype.playerAdded = function() {
+        this.showStatus(this.game.players[this.game.players.length-1].name+" joined the game");
     }
     PlayerView.prototype.updateTray = function() {
         var _this = this;
@@ -132,7 +136,8 @@
     }
     PlayerView.prototype.playMove = function() {
         var move = this.getMove();
-        this.game.makeMove(this.playernr, move);
+        var moved = this.game.makeMove(this.playernr, move);
+        if (!moved) this.updateTray();
     }
 
     PlayerView.prototype.showStatus = function(msg) {
