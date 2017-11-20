@@ -1,0 +1,108 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #435b54;
+    font-family: Helvetica, sans-serif;
+
+}
+
+#game {
+    margin: 0 auto;
+    width: 600px;
+    height: 720px;
+    font-size: 8px;
+    font-weight: bold;
+    text-align: center;
+    position: relative;
+}
+.board {
+    cursor: default;
+    margin: 40px 0;
+}
+
+.board table {
+    width: 600px;
+    height: 600px;
+    border-collapse: collapse;
+}
+.board td {
+    width: 36px;
+    height: 36px;
+    border: solid 2px white;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.board td                   {background-color: #c1bb9f;}
+.board td.triplewordscore   {background-color: #d95742;}
+.board td.doublewordscore   {background-color: #f3b7a8;}
+.board td.tripleletterscore {background-color: #3b9fb8;}
+.board td.doubleletterscore {background-color: #b7d3d0;}
+
+.tray {
+    width: 280px;
+    height: 40px;
+    padding: 0 40px;
+    background-color: #63431c;
+    border-bottom: solid 5px #3d2202;
+    position: absolute;
+    top: 640px;
+    left: 120px;
+}
+.status {
+    width: 600px;
+    height: 20px;
+    top: 600px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    line-height: 40px;
+    font-size: 14px;
+    position: absolute;
+    left: 0px;
+}
+
+.btn, .letter {
+    width: 38px;
+    height: 38px;
+    border-radius: 3px;
+    margin: 0 1px;
+    -webkit-user-select: none;
+    user-select: none;
+    background-color: #faeac8;
+    line-height: 40px;
+}
+.letter {
+    text-align: center;
+    font-weight: bold;
+    font-size: 20px;
+    float: left;
+    cursor: default;
+}
+
+.letter .score {
+    position: absolute;
+    bottom: 3px;
+    right: 3px;
+    font-size: 10px;
+    line-height: 10px;
+    font-weight: normal;
+}
+
+.board td .letter {
+    margin: -2px;
+    position: relative;
+}
+.tray .letter {
+    position: absolute;
+}
+.btn {
+    cursor: pointer;
+}
+
+.btn.playmove {
+    position: absolute;
+    top: 640px;
+    width: 80px;
+    left: 520px;
+}

@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Krabbelen</title>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>function require(f) {return window[f.replace('./','').replace('.js','')]};</script>
+        <script type="text/javascript" src="/res/data.js"></script>
+        <script type="text/javascript" src="/res/utils.js"></script>
+        <script type="text/javascript" src="/res/game.js"></script>
+        <script type="text/javascript" src="/res/views.js"></script>
+        <script type="text/javascript" src="/res/realtime.js"></script>
+        <script>
+            var g, v;
+            window.onload = function() {
+                var el = document.getElementById('game');
+
+                var req = new XMLHttpRequest();
+                req.open('GET', 'game', true);
+                req.responseType = 'json';
+                req.send(null);
+                req.onload = function() {
+                    if (req.status==200) {
+                        g = game.Game.unpack(req.response);
+                        g.addPlayer();
+                        var myPlayerNr = g.players.length-1;
+                        v = new views.PlayerView(g, el, myPlayerNr);
+                        new realtime.Realtime(g, myPlayerNr);
+                    }
+                };
+            }
+        </script>
+        <link href="/res/game.css" rel="stylesheet">
+    </head>
+    <body>
+        <div id=game>
+            <div class=board></div>
+            <div class=status>Waiting for your game of Krabbelen to start...</div>
+            <div class=tray></div>
+            <div class="btn playmove">play</div>
+        </div>
+    </body>
+</html>
