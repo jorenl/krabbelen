@@ -1,0 +1,29 @@
+.logo {
+    width: 360px;
+    height: 40px;
+    position: absolute;
+    top: 120px;
+    left: 120px;
+}
+.logo .letter {
+    position: absolute;
+}
+
+.btn.play {
+    position: absolute;
+    top: 240px;
+    width: 80px;
+    left: 400px;
+}
+
+select.lang {
+    position: absolute;
+    top: 240px;
+    left: 120px;
+    width: 80px;
+    height: 40px;
+    border-radius: 3px;
+    background-color: #faeac8;
+    font-weight: bold;
+    font-size: 14px;
+}

@@ -1,5 +1,6 @@
 (function(exports){
     var utils = require('./utils.js');
+    var game =  require('./game.js');
     
     function BoardView(board) {
         this.board = board;
@@ -99,8 +100,10 @@
                     utils.pos(el, startPos[0]+e2.clientX-e1.clientX,
                                 startPos[1]+e2.clientY-e1.clientY);
                 }
-                document.body.addEventListener('mousemove', mouseMoveListener);
-                document.body.addEventListener('mouseup', function(e3) {
+                var mouseUpListener = function(e3) {
+                    if (!el) return;
+                    document.body.removeEventListener('mousemove', mouseMoveListener);
+                    document.body.removeEventListener('mouseup', mouseUpListener);
                     var pos = utils.pos(el);
                     var grid_pos = [Math.round(pos[0]/40)+tray_grid_offset[0], Math.round(pos[1]/40)+tray_grid_offset[1]];
                     if ((grid_pos[0] >= tray_grid_offset[0] && grid_pos[0] < tray_grid_offset[0]+9 &&
@@ -110,11 +113,12 @@
                         grid_pos[1] >= 0 && grid_pos[1] < _this.game.board.size)) {
                             _this.letterPositions[index] = grid_pos;
                     }
-                    
                     utils.pos(el, (_this.letterPositions[index][0]-tray_grid_offset[0])*40,
                                 (_this.letterPositions[index][1]-tray_grid_offset[1])*40);
-                    document.body.removeEventListener('mousemove', mouseMoveListener);
-                }, {once: true});
+                    _this.showTentativeScore();
+                };
+                document.body.addEventListener('mousemove', mouseMoveListener);
+                document.body.addEventListener('mouseup', mouseUpListener);
             });
             utils.pos(el, (_this.letterPositions[index][0]-tray_grid_offset[0])*40,
                         (_this.letterPositions[index][1]-tray_grid_offset[1])*40);
@@ -123,21 +127,29 @@
     }
     PlayerView.prototype.getMove = function() {
         var _this = this;
-        var move = [];
+        var tiles = [];
         this.player.tray.forEach((letter, index) => {
             var pos = _this.letterPositions[index];
             if (pos[0] >= 0 && pos[0] < _this.game.board.size &&
                 pos[1] >= 0 && pos[1] < _this.game.board.size) {
-                    move.push([pos[1], pos[0], letter]);
+                    tiles.push([pos[1], pos[0], letter]);
             }
         });
-        move.sort((a,b)=>( (a[0]+a[1]) - (b[0]+b[1]))); //sort in increasing sum of coords
-        return move;
+        return (tiles.length > 0) ? new game.Move(_this.game, tiles) : false;
     }
     PlayerView.prototype.playMove = function() {
         var move = this.getMove();
         var moved = this.game.makeMove(this.playernr, move);
         if (!moved) this.updateTray();
+    }
+    PlayerView.prototype.showTentativeScore = function() {
+        var move = this.getMove();
+        if (move && move.isValid()) {
+            var words = move.getWords().map(w => w[3]);
+            this.showStatus("Play "+words.join(', ')+" for "+move.score()+" points");
+        } else {
+            this.showStatus("That's not a valid move");
+        }
     }
 
     PlayerView.prototype.showStatus = function(msg) {

@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Krabbelen</title>
+        <link href="/res/game.css" rel="stylesheet">
+        <link href="/res/splash.css" rel="stylesheet">
+        <script>
+            window.onload = function() {
+                var el_langselect = document.getElementsByClassName('lang')[0];
+                var el_playbtn = document.getElementsByClassName('play')[0];
+                el_langselect.addEventListener('change', function() {
+                    el_playbtn.href = '/game/new/'+el_langselect.value;
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <div id=game>
+            <div class=logo>
+                <div class="letter" style="left: 0px; top: 0px;">K<div class="score">3</div></div>
+                <div class="letter" style="left: 40px; top: 0px;">R<div class="score">2</div></div>
+                <div class="letter" style="left: 80px; top: 0px;">A<div class="score">1</div></div>
+                <div class="letter" style="left: 120px; top: 0px;">B<div class="score">3</div></div>
+                <div class="letter" style="left: 160px; top: 0px;">B<div class="score">3</div></div>
+                <div class="letter" style="left: 200px; top: 0px;">E<div class="score">1</div></div>
+                <div class="letter" style="left: 240px; top: 0px;">L<div class="score">3</div></div>
+                <div class="letter" style="left: 280px; top: 0px;">E<div class="score">1</div></div>
+                <div class="letter" style="left: 320px; top: 0px;">N<div class="score">1</div></div>
+            </div>
+            <select class=lang>
+                <option>en</option>
+                <option>nl</option>
+            </select>
+            <a class="btn play" href="/game/new/en">play</a>
+        </div>
+        <!-- GITHUB RIBBON -->
+        <a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+    </body>
+</html>

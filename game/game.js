@@ -36,33 +36,32 @@
         this.players.push(player);
         this.trigger('addPlayer');
     }
-    Game.prototype.playWordAt = function(playernr, word, row, col, vertical) {
-        var move = word.split('').map((letter, index) => (vertical ? [row+index,col,letter] : [row,col+index,letter]));
-        this.makeMove(playernr, move);
-    }
     Game.prototype.makeMove = function(playernr, move) {
         var _this = this;
-        if (!this.isValidMove(move)) return;
-        // move is a list of [row, col, letter] tiles
-        move.forEach((letter) => {
+        if (!move.isValid()) return;
+        move.tiles.forEach((letter) => {
             _this.board.letter(letter[0], letter[1], letter[2]);
             _this.players[playernr].removeLetterFromTray(letter[2]);
         });
-        _this.players[playernr].addLettersToTray(_this.drawLetters(move.length));
+        _this.players[playernr].addLettersToTray(_this.drawLetters(move.tiles.length));
         this.trigger('move', [playernr, move]);
         this.nextTurn();
+        return true;
     }
     Game.prototype.nextTurn = function() {
         this.whoseTurn = (this.whoseTurn + 1) % this.players.length;
         this.trigger('turnChanged');
     }
-    Game.prototype.isValidMove = function(move) {
-        var _this = this;
-        var allHorizontal = move.reduce((sofar, letter) => (sofar && (letter[0] == move[0][0])), true);
-        var allVertical   = move.reduce((sofar, letter) => (sofar && (letter[1] == move[0][1])), true);
-        var allEmptyTiles = move.reduce((sofar, letter) => (sofar && (_this.board.letter(letter[0], letter[1]) == "")), true);
-
-        return move.length <= 7 && (allVertical || allHorizontal) && allEmptyTiles
+    Game.prototype.isValidMove = function(tiles) {
+        return new Move(tiles).isValid();
+    }
+    Game.prototype.getMoveLetterFn = function(move) {
+        var newtiles = {};
+        move.forEach((tile) => newtiles[tile[0]+','+tile[1]] = tile[2]);
+        return (r,c) => (newtiles[r+','+c] || '')
+    }
+    Game.prototype.getLetterScore = function(letter) {
+        return this.letterDist[letter][0]
     }
     Game.prototype.pack = function() {
         return {
@@ -109,6 +108,90 @@
         return p;
     }
 
+    function Move(game, tiles) {
+        this.game = game;
+        this.tiles = tiles;
+        this.tilemap = {};
+        this.tiles.sort((a,b)=>( (a[0]+a[1]) - (b[0]+b[1]))); //sort in increasing sum of coords
+        tiles.forEach(t => this.tilemap[t[0]+','+t[1]] = t[2]);
+    }
+    Move.prototype.isValid = function() {
+        var _this = this;
+        var allHorizontal = this.tiles.reduce((sofar, tile) => (sofar && (tile[0] == _this.tiles[0][0])), true);
+        var allVertical   = this.tiles.reduce((sofar, tile) => (sofar && (tile[1] == _this.tiles[0][1])), true);
+        var allEmptyTiles = this.tiles.reduce((sofar, tile) => (sofar && !_this.game.board.letter(tile[0], tile[1])), true);
+
+        var first = this.tiles[0];
+        var last  = this.tiles[this.tiles.length-1];
+        var d = allVertical ? 0 : 1; //index of the varying coordinate
+
+        var continuous = true;
+        for (var i=0; i<last[d]-first[d]; i++) {
+            var r = first[0] + i*(1-d);
+            var c = first[1] + i*d;
+            continuous = continuous && this.letter(r,c);
+        }
+
+        return this.tiles.length <= 7 && (allVertical || allHorizontal) && allEmptyTiles && continuous;
+    }
+    Move.prototype.letter = function(r, c) {
+        // like Board.letter, but for the virtual board with this Move applied
+        return this.tilemap[r+','+c] || this.game.board.letter(r,c);
+    }
+    Move.prototype.isNewTile = function(r,c) {
+        return (r+','+c) in this.tilemap;
+    }
+    Move.prototype.getWords = function() {
+        var _this = this;
+        var words = [];
+
+        var discovered = new Set();
+        function discovering(r,c) {
+            var isnew = !discovered.has(r+','+c);
+            if (isnew) discovered.add(r+','+c);
+            return isnew;
+        }
+
+        this.tiles.forEach((tile) => {
+            var [r,c,l] = tile;
+            var l0,l1;
+
+            discovering(r,c);
+
+            //horizontal
+            var c0=c, c1=c, hword = l;
+            while (discovering(r,c0-1) && (l0 = _this.letter(r,c0-1))) {hword = l0+hword; c0--};
+            while (discovering(r,c1+1) && (l1 = _this.letter(r,c1+1))) {hword = hword+l1; c1++};
+
+            //vertical
+            var r0=r, r1=r, vword = l;
+            while (discovering(r0-1,c) && (l0 = _this.letter(r0-1,c))) {vword = l0+vword; r0--};
+            while (discovering(r1+1,c) && (l1 = _this.letter(r1+1,c))) {vword = vword+l1; r1++};
+
+            if (hword.length>1) words.push([r,c0,1,hword]);
+            if (vword.length>1) words.push([r0,c,0,vword]);
+        });
+
+        return words;
+    }
+    Move.prototype.score = function() {
+        var _this = this;
+        var score = 0;
+        this.getWords().forEach((wordplay) => {
+            var [r0, c0, dim, word] = wordplay;
+            var wordscore = 0, wordMultiplier = 1;
+            word.split('').forEach((letter, i) => {
+                var [r,c] = [r0 + i*(1-dim), c0 + i*dim];
+                var letterMultiplier = (_this.isNewTile(r,c)) ? _this.game.board.getLetterScoreMultiplierAt(r,c) : 1;
+                wordMultiplier *= (_this.isNewTile(r,c)) ? _this.game.board.getWordScoreMultiplierAt(r,c) : 1;
+                wordscore += _this.game.getLetterScore(letter) * letterMultiplier;
+            });
+            score += wordscore*wordMultiplier;
+        });
+        if (this.tiles.length == 7) score += 50;
+        return score;
+    }
+
     function Board() {
         this.size = 15;
         this.cells = [];
@@ -139,7 +222,7 @@
         var multiplierCode = this.getScoreMultiplierCodeAt(row, col);
         switch (multiplierCode){
             case 't': return 3;
-            case 'D': return 2;
+            case 'd': return 2;
             default:  return 1;
         }
     }
@@ -164,6 +247,7 @@
     }
 
     exports.Game = Game;
+    exports.Move = Move;
     exports.Player = Player;
     exports.Board = Board;
 })(typeof exports==='undefined' ? this['game']={} : exports);

@@ -16,9 +16,9 @@ var games = {};
 app.use('/res', express.static(path.resolve('./game')));
 app.get('/', function(req, res){res.sendFile(path.resolve('./splash.htm'));});
 
-app.get('/game/new', function(req, res){
+app.get('/game/new/:lang', function(req, res){
     var gameid = Math.random().toString(36).substr(2,6);
-    games[gameid] = new game.Game('nl');
+    games[gameid] = new game.Game(req.params.lang);
     res.redirect('/game/'+gameid+'/play');
 });
 app.all('/game/:gameid', function(req,res,next) {
@@ -41,7 +41,7 @@ io.on('connection', function(socket){
     socket.join(gameid);
     socket.on('move', function(move) {
         console.log(gameid, move[0]);
-        games[gameid].makeMove(move[0], move[1]);
+        games[gameid].makeMove(move[0], new game.Move(games[gameid], move[1]));
         console.log(games[gameid].board.toString());
         socket.in(gameid).emit('move', move);
     });
