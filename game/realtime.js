@@ -15,7 +15,7 @@
             }
         });
         socket.on('move', function(move) {
-            game.makeMove(move[0], new game.Move(move[1]));
+            game.makeMove(move[0], new gamelib.Move(game, move[1]));
         });
 
         socket.emit('addPlayer', game.players[game.players.length-1].pack());

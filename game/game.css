@@ -9,15 +9,15 @@ html, body {
 #game {
     margin: 0 auto;
     width: 600px;
-    height: 720px;
+    height: 800px;
     font-size: 8px;
     font-weight: bold;
     text-align: center;
     position: relative;
+    overflow: hidden; /* to prevent margin collapse */
 }
 .board {
     cursor: default;
-    margin: 40px 0;
 }
 
 .board table {
@@ -39,6 +39,34 @@ html, body {
 .board td.tripleletterscore {background-color: #3b9fb8;}
 .board td.doubleletterscore {background-color: #b7d3d0;}
 
+
+.scoreboard {
+    margin: 20px 0;
+    height: 40px;
+    width: 600px;
+}
+.scoreboard .playerscore {
+    width: 120px;
+    height: 40px;
+    float: left;
+}
+.scoreboard .playerscore .letter {
+    float: left;
+    height: 40px;
+    position: relative;
+}
+.scoreboard .playerscore.notturn .letter {
+    border: 1px solid white;
+    background: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+}
+.scoreboard .playerscore .score {
+    float: left;
+    width: 80px;
+    height: 40px;
+}
 .tray {
     width: 280px;
     height: 40px;
@@ -46,20 +74,22 @@ html, body {
     background-color: #63431c;
     border-bottom: solid 5px #3d2202;
     position: absolute;
-    top: 640px;
+    top: 720px;
     left: 120px;
 }
 .status {
     width: 600px;
     height: 20px;
-    top: 600px;
+    top: 680px;
+    position: absolute;
+    left: 0px;
+}
+.status, .scoreboard .playerscore .score {
     text-align: center;
     color: white;
     font-weight: bold;
     line-height: 40px;
     font-size: 14px;
-    position: absolute;
-    left: 0px;
 }
 
 .btn, .letter {
@@ -80,7 +110,7 @@ html, body {
     cursor: default;
 }
 
-.letter .score {
+.letter .score, .letter .sub {
     position: absolute;
     bottom: 3px;
     right: 3px;
@@ -106,7 +136,7 @@ html, body {
 
 .btn.playmove {
     position: absolute;
-    top: 640px;
+    top: 720px;
     width: 80px;
     left: 520px;
 }

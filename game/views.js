@@ -48,7 +48,7 @@
         }
     }
 
-    PlayerView = function(game, el, playernr) {
+    function PlayerView(game, el, playernr) {
         var _this = this;
 
         this.game = game;
@@ -58,13 +58,15 @@
 
         this.boardView = new BoardView(this.game.board)
         this.el = el;
+        this.el_score   = el.getElementsByClassName('scoreboard')[0];
         this.el_board   = el.getElementsByClassName('board')[0];
         this.el_tray    = el.getElementsByClassName('tray')[0];
         this.el_btnplay = el.getElementsByClassName('playmove')[0];
         this.el_status  = el.getElementsByClassName('status')[0];
-
+        
         this.el_btnplay.addEventListener('click', this.playMove.bind(this));
 
+        this.scoreBoardView = new ScoreBoardView(this.el_score, game);
         this.el_board.appendChild(this.boardView.el);
 
         this.player.on('trayChanged', this.updateTray.bind(this));
@@ -73,6 +75,7 @@
 
         this.updateTray();
         this.turnChanged();
+        this.scoreBoardView.playerAdded();
     }
 
     PlayerView.prototype.turnChanged = function() {
@@ -165,6 +168,45 @@
         el_score.appendChild(document.createTextNode(g.letterDist[letter][0])); // Uses the "g" game global, bad.
         el.appendChild(el_score);
         return el;
+    }
+
+    function ScoreBoardView(el, game) {
+        this.game = game;
+
+        this.playerScoreViews = [];
+
+        this.el = el;
+
+        this.game.on('addPlayer', ()=>this.playerAdded());
+    }
+    ScoreBoardView.prototype.playerAdded = function() {
+        while (this.playerScoreViews.length < this.game.players.length) {
+            var v = new PlayerScoreView(this.game, this.playerScoreViews.length);
+            this.playerScoreViews.push(v);
+            this.el.appendChild(v.el);
+        }
+    }
+
+    function PlayerScoreView(game, playernr) {
+        this.game = game;
+        this.playernr = playernr;
+        this.player = game.players[playernr];
+
+        this.el = document.getElementById('tpl-playerscore').content.firstChild.cloneNode(true);
+        this.el_score = this.el.getElementsByClassName('score')[0];
+        this.el_icon  = this.el.getElementsByClassName('icon')[0];
+        this.el_sub   = this.el.getElementsByClassName('sub')[0];
+
+        this.player.on('scoreChanged', ()=>{this.update()});
+        this.game.on('turnChanged', ()=>this.update());
+
+        this.update();
+    }
+    PlayerScoreView.prototype.update = function() {
+        utils.setText(this.el_score, this.player.score);
+        utils.setText(this.el_icon, this.player.name.substr(0,1));
+        utils.setText(this.el_sub,  this.player.name.substr(this.player.name.length-1,1));
+        this.el.classList.toggle('notturn', this.playernr!=this.game.whoseTurn);
     }
 
     exports.BoardView = BoardView;

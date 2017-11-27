@@ -39,6 +39,7 @@
     Game.prototype.makeMove = function(playernr, move) {
         var _this = this;
         if (!move.isValid()) return;
+        _this.players[playernr].addScore(move.score());
         move.tiles.forEach((letter) => {
             _this.board.letter(letter[0], letter[1], letter[2]);
             _this.players[playernr].removeLetterFromTray(letter[2]);
@@ -93,6 +94,10 @@
     }
     Player.prototype.removeLetterFromTray = function(letter) {
         this.tray.splice(this.tray.indexOf(letter), 1);
+    }
+    Player.prototype.addScore = function(points) {
+        this.score += points;
+        this.trigger('scoreChanged');
     }
     Player.prototype.pack = function() {
         return {
