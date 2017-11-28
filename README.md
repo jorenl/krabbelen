@@ -9,6 +9,7 @@ World's greatest word game in the browser!
 ## Play
 
 http://krabbelen.azurewebsites.net
+
 After creating a new game in your favorite language, just send your friends the URL. They'll join the game just by opening the page.
 
 ## Modify
