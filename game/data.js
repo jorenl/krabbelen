@@ -3,7 +3,7 @@
 
     exports.letter_distributions = {
         'en': {
-            '0': [0, 2],
+            ' ': [0, 2],
             'E': [1, 12],
             'A': [1, 9],
             'I': [1, 9],
